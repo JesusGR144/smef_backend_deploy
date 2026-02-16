@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import generarId from '../helpers/generarId.js';
 
 const instructorSchema = new mongoose.Schema({
     nombre: {
@@ -27,7 +29,8 @@ const instructorSchema = new mongoose.Schema({
        trim: true
     },
     token: {
-       type: String 
+       type: String,
+       default: generarId
     },
     confirmado: {
         type: Boolean,
@@ -35,6 +38,19 @@ const instructorSchema = new mongoose.Schema({
     }
 });
 
+instructorSchema.pre('save', async function() {
+    if(!this.isModified('password')){
+        return;
+    }
+
+   const salt = await bcrypt.genSalt(10);
+   this.password = await bcrypt.hash(this.password, salt);
+
+});
+
+instructorSchema.methods.comprobarPassword = async function(passwordFormulario) {
+    return await bcrypt.compare(passwordFormulario, this.password);
+}
 
 const Instructor = mongoose.model('Instructor', instructorSchema);
 
