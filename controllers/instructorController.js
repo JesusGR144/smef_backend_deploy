@@ -56,7 +56,7 @@ const confirmar = async (req, res) => {
 }
 
 const autenticar = async (req, res) => {
-    const { email, password, confirmado } = req.body;
+    const { email, password } = req.body;
 
     // Comprobar si el usuario existe
     const usuario = await Instructor.findOne({ email });
