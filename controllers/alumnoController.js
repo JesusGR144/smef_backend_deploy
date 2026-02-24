@@ -1,4 +1,5 @@
 import Alumno from '../models/alumno.js';
+import { generarMensualidad, aplicarRecargos } from '../services/mensualidadService.js';
 
 const registrarAlumno = async (req, res) => {
     const alumno = new Alumno(req.body);
@@ -14,18 +15,10 @@ const registrarAlumno = async (req, res) => {
 
 const obtenerAlumnos = async (req, res) => {
 
+    await generarMensualidad();
+    await aplicarRecargos();
+
     const alumnos = await Alumno.find();
-
-    // const alumnosConCumple = alumnos.map(alumno => {
-
-    //     const edad = recordatorioCumple(alumno.fechaCumple);
-
-    //     return {
-    //         ...alumno.toObject(),  // convierte documento mongoose a objeto normal
-    //         esCumple: edad !== null,
-    //         edadCumple: edad
-    //     };
-    // });
 
     res.json(alumnos);
 };
@@ -52,10 +45,17 @@ const actualizarAlumno = async (req, res) => {
         res.status(404).json({ msg: "Alumno no encontrado" });
     }
 
+    const estabaInactivo = alumno.estatus === false;
+    const quiereActivarlo = req.body.estatus === true;
+
+    // Reactivación detectada
+    if (estabaInactivo && quiereActivarlo) {
+        alumno.fechaInicioActivo = new Date();
+    }
+
+
     alumno.nombre = req.body.nombre || alumno.nombre;
-    alumno.email = req.body.email || alumno.email;
-    alumno.fechaRegistro = req.body.fechaRegistro || alumno.fechaRegistro;
-    alumno.fechaCumple = req.body.fechaCumple || alumno.fechaCumple;
+    alumno.email = req.body.email || alumno.email;    
     alumno.estatus = req.body.estatus ?? alumno.estatus;
 
     // Actualizar alumno
