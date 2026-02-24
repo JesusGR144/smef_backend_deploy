@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import recordatorioCumple from '../helpers/recordatorioCumple.js';
-import recordatorioPago from '../helpers/recordatorioPago.js';
 
 const alumnoSchema = new mongoose.Schema({
     nombre: {
@@ -26,6 +25,18 @@ const alumnoSchema = new mongoose.Schema({
     estatus: {
         type: Boolean,
         default: true
+    },    
+    fechaBaja: {
+        type: Date,
+        default: null
+    },
+    haSidoBaja: {
+        type: Boolean,
+        default: false
+    },
+    fechaInicioActivo: {
+        type: Date,
+        default: Date.now
     },
     instructor: {
         type: mongoose.Schema.Types.ObjectId,
@@ -45,10 +56,6 @@ alumnoSchema.virtual('esCumple').get(function () {
 
 alumnoSchema.virtual('edadCumple').get(function () {
     return recordatorioCumple(this.fechaCumple);
-});
-
-alumnoSchema.virtual('diaPago').get(function () {
-    return recordatorioPago(this.fechaRegistro);
 });
 
 alumnoSchema.set('toJSON', { virtuals: true });
