@@ -1,45 +1,44 @@
-import Alumno from "../models/alumno.js"
+import Alumno from "../models/alumno.js";
 import Mensualidad from "../models/Mensualidad.js";
+import ConfiguracionMensualidad from "../models/ConfiguracionMensualidad.js";
 
 const generarMensualidad = async () => {
-
     const periodoActual = obtenerPeriodoActual();
-
-    const alumnos = await Alumno.find({ estatus: true })
+    const alumnos = await Alumno.find({ estatus: true });
 
     for (const alumno of alumnos) {
-
-        // Validar si el alumno previamente estaba activo antes del periodo actual
-        // if(alumno.fechaInicioActivo > new Date()) continue;
-        if (!alumno.estatus) continue;
-
-        // Verificar si ya existe mensualidad del periodo
-        const existeMensualidad = await Mensualidad.findOne({ alumno: alumno._id, periodo: periodoActual });
+        const existeMensualidad = await Mensualidad.findOne({
+            alumno: alumno._id,
+            periodo: periodoActual
+        });
 
         if (existeMensualidad) continue;
 
+        const config = await ConfiguracionMensualidad.findOne({ tipo: alumno.tipo });
+        if (!config) continue;
 
         try {
-            // Crear mensualidad
             await Mensualidad.create({
                 alumno: alumno._id,
-                montoTotal: 750,
+                montoTotal: config.monto,
                 periodo: periodoActual
             });
         } catch (error) {
             if (error.code === 11000) {
-                // Ya se creó en otro proceso, ignoramos
                 continue;
             } else {
                 throw error;
             }
         }
     }
-}
+};
 
 const aplicarRecargos = async () => {
     const periodoActual = obtenerPeriodoActual();
-    const mensualidades = await Mensualidad.find({ periodo: periodoActual, pagado: false }).populate('alumno');
+    const mensualidades = await Mensualidad.find({
+        periodo: periodoActual,
+        pagado: false
+    }).populate('alumno');
     const fechaActual = new Date();
 
     for (const mensualidad of mensualidades) {
@@ -70,11 +69,37 @@ const obtenerPeriodoActual = () => {
     const fechaActual = new Date();
     const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
     const anio = fechaActual.getFullYear();
-
     return `${anio}-${mes}`;
-}
+};
+
+const registrarAbono = async (id, abono) => {
+    const mensualidad = await Mensualidad.findById(id);
+    if (!mensualidad) throw new Error("Mensualidad no encontrada");
+
+    mensualidad.abono += abono;
+
+    if (mensualidad.abono >= mensualidad.montoTotal + mensualidad.recargo) {
+        mensualidad.pagado = true;
+    }
+
+    return await mensualidad.save();
+};
+
+const liquidarMensualidad = async (id) => {
+    const mensualidad = await Mensualidad.findById(id);
+    if (!mensualidad) throw new Error("Mensualidad no encontrada");
+
+    mensualidad.abono = mensualidad.montoTotal + mensualidad.recargo;
+    mensualidad.pagado = true;
+
+    return await mensualidad.save();
+};
+
+const obtenerMensualidades = async () => {
+    return await Mensualidad.find().populate('alumno', 'nombre');
+};
 
 export {
     generarMensualidad,
     aplicarRecargos
-}
+};
