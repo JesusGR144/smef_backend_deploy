@@ -14,6 +14,12 @@ const alumnoSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    tipo: {
+        type: String,
+        enum: ['adulto', 'niño'],
+        required: true,
+        default: 'adulto'
+    },
     fechaRegistro: {
         type: Date,
         required: true,

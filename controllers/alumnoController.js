@@ -1,93 +1,63 @@
-import Alumno from '../models/alumno.js';
 import { generarMensualidad, aplicarRecargos } from '../services/mensualidadService.js';
+import {
+    crearAlumno,
+    obtenerAlumnos,
+    obtenerAlumnoPorId,
+    actualizarAlumno,
+    eliminarAlumno
+} from '../services/alumnoService.js';
 
 const registrarAlumno = async (req, res) => {
-    const alumno = new Alumno(req.body);
-    alumno.instructor = req.instructor._id;
-
     try {
-        const alumnoAlmacenado = await alumno.save();
-        res.json({ alumnoAlmacenado });
+        const alumno = await crearAlumno(req.body, req.instructor._id);
+        res.status(201).json(alumno);
     } catch (error) {
-        console.log(error.message);
+        res.status(400).json({ msg: error.message });
     }
 };
 
-const obtenerAlumnos = async (req, res) => {
-
-    await generarMensualidad();
-    await aplicarRecargos();
-
-    const alumnos = await Alumno.find();
-
-    res.json(alumnos);
-};
-
-
-const obtenerAlumno = async (req, res) => {
-    const { id } = req.params;
-
-    const alumno = await Alumno.findById(id);
-
-    if (!alumno) {
-        return res.status(404).json({ msg: "Alumno no encontrado" });
-    }
-
-    res.json(alumno);
-};
-
-const actualizarAlumno = async (req, res) => {
-    const { id } = req.params;
-
-    const alumno = await Alumno.findById(id);
-
-    if (!alumno) {
-        res.status(404).json({ msg: "Alumno no encontrado" });
-    }
-
-    const estabaInactivo = alumno.estatus === false;
-    const quiereActivarlo = req.body.estatus === true;
-
-    // Reactivación detectada
-    if (estabaInactivo && quiereActivarlo) {
-        alumno.fechaInicioActivo = new Date();
-    }
-
-
-    alumno.nombre = req.body.nombre || alumno.nombre;
-    alumno.email = req.body.email || alumno.email;    
-    alumno.estatus = req.body.estatus ?? alumno.estatus;
-
-    // Actualizar alumno
+const obtenerTodosAlumnos = async (req, res) => {
     try {
-        const alumnoActualizado = await alumno.save();
-        res.json(alumnoActualizado);
+        await generarMensualidad();
+        await aplicarRecargos();
+        const alumnos = await obtenerAlumnos();
+        res.json(alumnos);
     } catch (error) {
-        console.log(error);
+        res.status(500).json({ msg: error.message });
     }
 };
 
-const eliminarAlumno = async (req, res) => {
-    const { id } = req.params;
-
-    const alumno = await Alumno.findById(id);
-
-    if (!alumno) {
-        res.status(404).json({ msg: "Alumno no encontrado" });
-    }
-
+const obtenerUnAlumno = async (req, res) => {
     try {
-        await alumno.deleteOne();
-        res.json({ msg: "Alumno eliminado" });
+        const alumno = await obtenerAlumnoPorId(req.params.id);
+        res.json(alumno);
     } catch (error) {
-        console.log(error);
+        res.status(404).json({ msg: error.message });
+    }
+};
+
+const actualizarUnAlumno = async (req, res) => {
+    try {
+        const alumno = await actualizarAlumno(req.params.id, req.body);
+        res.json(alumno);
+    } catch (error) {
+        res.status(400).json({ msg: error.message });
+    }
+};
+
+const eliminarUnAlumno = async (req, res) => {
+    try {
+        const resultado = await eliminarAlumno(req.params.id);
+        res.json(resultado);
+    } catch (error) {
+        res.status(404).json({ msg: error.message });
     }
 };
 
 export {
     registrarAlumno,
-    obtenerAlumnos,
-    obtenerAlumno,
-    actualizarAlumno,
-    eliminarAlumno
+    obtenerTodosAlumnos,
+    obtenerUnAlumno,
+    actualizarUnAlumno,
+    eliminarUnAlumno
 };
