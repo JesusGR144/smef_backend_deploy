@@ -27,7 +27,7 @@ const obtenerTodosAlumnos = async (req, res) => {
     }
 };
 
-const obtenerUnAlumno = async (req, res) => {
+const obtenerAlumno = async (req, res) => {
     try {
         const alumno = await obtenerAlumnoPorId(req.params.id);
         res.json(alumno);
@@ -57,7 +57,7 @@ const eliminarUnAlumno = async (req, res) => {
 export {
     registrarAlumno,
     obtenerTodosAlumnos,
-    obtenerUnAlumno,
+    obtenerAlumno,
     actualizarUnAlumno,
     eliminarUnAlumno
 };

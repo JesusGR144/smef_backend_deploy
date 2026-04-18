@@ -1,6 +1,6 @@
 import Alumno from "../models/alumno.js";
 import Mensualidad from "../models/Mensualidad.js";
-import ConfiguracionMensualidad from "../models/ConfiguracionMensualidad.js";
+import configuracionMensualidad from "../models/configuracionMensualidad.js";
 
 const generarMensualidad = async () => {
     const periodoActual = obtenerPeriodoActual();
@@ -14,7 +14,7 @@ const generarMensualidad = async () => {
 
         if (existeMensualidad) continue;
 
-        const config = await ConfiguracionMensualidad.findOne({ tipo: alumno.tipo });
+        const config = await configuracionMensualidad.findOne({ tipo: alumno.tipo });
         if (!config) continue;
 
         try {
@@ -101,5 +101,7 @@ const obtenerMensualidades = async () => {
 
 export {
     generarMensualidad,
-    aplicarRecargos
+    aplicarRecargos, registrarAbono,
+    liquidarMensualidad,
+    obtenerMensualidades
 };

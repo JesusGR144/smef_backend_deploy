@@ -13,6 +13,6 @@ const configuracionSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const ConfiguracionMensualidad = mongoose.model('ConfiguracionMensualidad', configuracionSchema);
+const configuracionMensualidad = mongoose.model('ConfiguracionMensualidad', configuracionSchema);
 
-export default ConfiguracionMensualidad;
+export default configuracionMensualidad;

@@ -1,23 +1,23 @@
 import express from "express";
 const router = express.Router();
 import {registrarAlumno, 
-        obtenerAlumnos,
+        obtenerTodosAlumnos,
         obtenerAlumno,
-        actualizarAlumno,
-        eliminarAlumno,
+        actualizarUnAlumno,
+        eliminarUnAlumno,
 } from "../controllers/alumnoController.js";
 import checkAuth from "../middleware/authMiddleware.js";
 
 router
     .route("/")
     .post(checkAuth, registrarAlumno)
-    .get(checkAuth, obtenerAlumnos);
+    .get(checkAuth, obtenerTodosAlumnos);
 
 router
     .route("/:id")
     .get(checkAuth, obtenerAlumno)
-    .put(checkAuth, actualizarAlumno)
-    .delete(checkAuth, eliminarAlumno);
+    .put(checkAuth, actualizarUnAlumno)
+    .delete(checkAuth, eliminarUnAlumno);
     
 
 export default router; 

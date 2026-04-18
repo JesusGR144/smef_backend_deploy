@@ -1,11 +1,11 @@
-import ConfiguracionMensualidad from "../models/ConfiguracionMensualidad.js";
+import configuracionMensualidad from "../models/configuracionMensualidad.js";
 
 const obtenerConfiguracion = async () => {
-    return await ConfiguracionMensualidad.find();
+    return await configuracionMensualidad.find();
 };
 
 const actualizarMonto = async (tipo, monto) => {
-    const config = await ConfiguracionMensualidad.findOne({ tipo });
+    const config = await configuracionMensualidad.findOne({ tipo });
     if (!config) throw new Error(`No existe configuración para ${tipo}`);
 
     config.monto = monto;
